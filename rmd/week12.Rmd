@@ -9,6 +9,7 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+Script Settings and Resources
 ```{r}
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 library(tidyverse)
@@ -19,13 +20,31 @@ library(tm)
 library(RedditExtractoR)
 library(ldatuning)
 library(dendextend)
-library(qdap)
 library(textstem)
 ```
-
 
 
 ```{r}
 library(qdap)
 ```
 
+Data Import and Cleaning
+```{r}
+#getting urls
+reddit_thread_urls <- find_thread_urls(
+  subreddit= "IOPsychology",
+  sort_by= "new",
+  period= "year"
+) %>%
+  mutate(date_utc=ymd(date_utc))
+#specifying urls for the past year
+thread_urls2 <- filter(reddit_thread_urls, timestamp > as.numeric(as.POSIXct(Sys.Date()-365)))
+nrow(thread_urls2)
+#getting content
+reddit_content <- get_thread_content(thread_urls2$url)
+```
+
+
+Visualization
+
+Analysis
