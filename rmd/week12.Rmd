@@ -31,23 +31,28 @@ library(qdap)
 Data Import and Cleaning
 ```{r}
 #getting urls
-reddit_thread_urls <- find_thread_urls(
-  subreddit= "IOPsychology",
-  sort_by= "new",
-  period= "year"
-) %>%
-  mutate(date_utc=ymd(date_utc))
+#reddit_thread_urls <- find_thread_urls(
+ # subreddit= "IOPsychology",
+ # sort_by= "new",
+ # period= "year"
+#) %>%
+ # mutate(date_utc=ymd(date_utc))
+#write_csv(reddit_thread_urls, file = "../data/reddit_thread_urls.csv")
 #specifying urls for the past year
-thread_urls2 <- filter(reddit_thread_urls, timestamp > as.numeric(as.POSIXct(Sys.Date()-365)))
-nrow(thread_urls2)
+#thread_urls2 <- filter(reddit_thread_urls, timestamp > as.numeric(as.POSIXct(Sys.Date()-365)))
+#nrow(thread_urls2)
+#write_csv(thread_urls2, file="../data/thread_urls2.csv")
 #getting content
-reddit_content <- get_thread_content(thread_urls2$url)
-
+#reddit_content <- get_thread_content(thread_urls2$url)
+#saveRDS(reddit_content, file= "../data/reddit_content.RDS")
 ###making the reddit tibble
-week12_tbl <- tibble(
-  title = reddit_content$threads$title,
-  upvotes = reddit_content$threads$upvotes
-)
+#week12_tbl <- tibble(
+  #title = reddit_content$threads$title,
+ # upvotes = reddit_content$threads$upvotes
+#)
+#write_csv(week12_tbl, file= "../data/week12_tbl.csv")
+
+week12_tbl <- read_csv("../data/week12_tbl.csv")
 ```
 
 
