@@ -1,0 +1,31 @@
+---
+title: "PSY8712-Week12"
+author: "Mackenzie R Nickle"
+date: "2024-04-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+library(tidyverse)
+library(tidytext)
+library(wordcloud)
+library(topicmodels)
+library(tm)
+library(RedditExtractoR)
+library(ldatuning)
+library(dendextend)
+library(qdap)
+library(textstem)
+```
+
+
+
+```{r}
+library(qdap)
+```
+
