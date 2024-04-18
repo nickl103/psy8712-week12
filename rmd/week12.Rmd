@@ -21,12 +21,10 @@ library(RedditExtractoR)
 library(ldatuning)
 library(dendextend)
 library(textstem)
-```
-
-
-```{r}
+library(rJava)
 library(qdap)
 ```
+
 
 Data Import and Cleaning
 ```{r}
