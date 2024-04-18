@@ -42,6 +42,12 @@ thread_urls2 <- filter(reddit_thread_urls, timestamp > as.numeric(as.POSIXct(Sys
 nrow(thread_urls2)
 #getting content
 reddit_content <- get_thread_content(thread_urls2$url)
+
+###making the reddit tibble
+week12_tbl <- tibble(
+  title = reddit_content$threads$title,
+  upvotes = reddit_content$threads$upvotes
+)
 ```
 
 
