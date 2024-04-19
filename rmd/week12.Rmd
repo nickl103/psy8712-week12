@@ -53,6 +53,7 @@ Data Import and Cleaning
 ##reimporting just the previously created csv file for week12_tbl
 
 week12_tbl <- read_csv("../data/week12_tbl.csv")
+n <- nrow(week12_tbl)
 
 ##creating corpus
 
@@ -64,10 +65,16 @@ io_corpus <- io_corpus_original %>%
   tm_map(stripWhitespace) %>% #removing extra white space
   tm_map(removeNumbers) %>% #removing numbers because we don't need these for this analysis
   tm_map(removeWords, c("io", "iopsychology", "iopsychologist", "io psych", "riopsychology", "iopsychologists", "riopsychologists", "industrial organizational psychology", "industrial organizational psych", "io psychs", "psychology", "psych")) %>% 
-  tm_map(removeWords, stopwords("en"))  #removing normal english stopwords. did this after removing the io stuff because it was getting rid of i's 
+  tm_map(removeWords, stopwords("en")) %>% #removing normal english stopwords. did this after removing the io stuff because it was getting rid of i's 
 #did not include replace_abbreviations or replace_contractions because it was messing with things
 
-compare_them <- function
+compare_them <- function(x,y){ #used x,y so can be used for other corpuses if needed
+  case <- sample(1:n,1) #n being the number of rows (used nrows on week12_tbl for this but wanted the function to work outside of specific tibble)
+  print(x[[case]]$content) #prints the content for the selected row for x
+  print(y[[case]]$content)#prints the content for the selected row for y 
+}
+
+compare_them(io_corpus_original, io_corpus) #running the compare function to see differences between the original corpus and the preprocessed corpus. 
 ```
 
 
