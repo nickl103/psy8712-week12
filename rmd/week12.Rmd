@@ -50,7 +50,24 @@ Data Import and Cleaning
 #)
 #write_csv(week12_tbl, file= "../data/week12_tbl.csv")
 
+##reimporting just the previously created csv file for week12_tbl
+
 week12_tbl <- read_csv("../data/week12_tbl.csv")
+
+##creating corpus
+
+io_corpus_original <- VCorpus(VectorSource(week12_tbl$title)) #using data camp procedures
+
+io_corpus <- io_corpus_original %>% 
+  tm_map(content_transformer(str_to_lower)) %>% #making all words lowercase so I don't have to specify IO vs io
+  tm_map(removePunctuation) %>% #removing punctuation so I don't have to deal with punctuation when getting rid of io psych 
+  tm_map(stripWhitespace) %>% #removing extra white space
+  tm_map(removeNumbers) %>% #removing numbers because we don't need these for this analysis
+  tm_map(removeWords, c("io", "iopsychology", "iopsychologist", "io psych", "riopsychology", "iopsychologists", "riopsychologists", "industrial organizational psychology", "industrial organizational psych", "io psychs", "psychology", "psych")) %>% 
+  tm_map(removeWords, stopwords("en"))  #removing normal english stopwords. did this after removing the io stuff because it was getting rid of i's 
+#did not include replace_abbreviations or replace_contractions because it was messing with things
+
+compare_them <- function
 ```
 
 
