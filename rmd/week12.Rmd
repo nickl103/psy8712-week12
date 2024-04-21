@@ -90,6 +90,28 @@ io_slim_dtm <- removeSparseTerms(io_dtm, 0.996) # used remove Sparse Terms, mess
 
 io_slim_dtm_tbl <- io_slim_dtm %>% as.matrix %>% as.tibble #ratio is between 2:1 to 3:1 because it's 623 to 250
 
+tokenCounts <- apply(io_slim_dtm, 1, sum) #removing empty rows per lecture slides
+
+original_rows <- rownames(io_slim_dtm) #used chatgpt to figure out how to save which rows would be removed
+io_clean_dtm <- io_slim_dtm[tokenCounts > 0, ] #cleaning io_slim_dtm per lecture slides
+
+removed_rows <- setdiff(original_rows, rownames(io_clean_dtm)) #code from chatgpt to see which rows were removed
+
+print(removed_rows) #viewing which rows were removed
+
+io_clean_dtm_tbl <- io_clean_dtm %>% as.matrix %>% as.tibble #making io_clean_dtm a matrix and a tibble so I can examine. Cleaning removed 54 observations. 
+
+#using lda to categorize topics from io_slim_dtm
+
+io_dtm_tune <- FindTopicsNumber(
+  io_clean_dtm,
+  topics = seq(2,15,1),
+  metrics= c("Griffiths2004",
+             "CaoJaun2009",
+             "Arun2010",
+             "Deveaud2014"),
+  verbose=T
+)
 ```
 
 
