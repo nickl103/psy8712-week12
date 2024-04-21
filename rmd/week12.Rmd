@@ -23,6 +23,7 @@ library(dendextend)
 library(textstem)
 library(rJava)
 library(qdap)
+library(RWeka)
 ```
 
 
@@ -62,20 +63,35 @@ io_corpus_original <- VCorpus(VectorSource(week12_tbl$title)) #using data camp p
 io_corpus <- io_corpus_original %>% 
   tm_map(content_transformer(str_to_lower)) %>% #making all words lowercase so I don't have to specify IO vs io
   tm_map(removePunctuation) %>% #removing punctuation so I don't have to deal with punctuation when getting rid of io psych 
-  tm_map(stripWhitespace) %>% #removing extra white space
   tm_map(removeNumbers) %>% #removing numbers because we don't need these for this analysis
-  tm_map(removeWords, c("io", "iopsychology", "iopsychologist", "io psych", "riopsychology", "iopsychologists", "riopsychologists", "industrial organizational psychology", "industrial organizational psych", "io psychs", "psychology", "psych")) %>% 
+  tm_map(removeWords, c("io", "iopsychology", "iopsychologist", "io psych", "riopsychology", "iopsychologists", "riopsychologists", "industrial organizational psychology", "industrial organizational psych", "io psychs", "psychology", "psych", "industrial organizational", "iop", "industrialorganizational")) %>% 
   tm_map(removeWords, stopwords("en")) %>% #removing normal english stopwords. did this after removing the io stuff because it was getting rid of i's 
-#did not include replace_abbreviations or replace_contractions because it was messing with things
-
+  tm_map(stripWhitespace) %>%  #removing extra white space
+  tm_map(content_transformer(replace_abbreviation)) %>% #replacing abbreviations
+  tm_map(content_transformer(replace_contraction)) #replacing contractions
+  
 compare_them <- function(x,y){ #used x,y so can be used for other corpuses if needed
   case <- sample(1:n,1) #n being the number of rows (used nrows on week12_tbl for this but wanted the function to work outside of specific tibble)
   print(x[[case]]$content) #prints the content for the selected row for x
   print(y[[case]]$content)#prints the content for the selected row for y 
 }
 
-compare_them(io_corpus_original, io_corpus) #running the compare function to see differences between the original corpus and the preprocessed corpus. 
+compare_them(io_corpus_original, io_corpus) #running the compare function to see differences between the original corpus and the preprocessed corpus. seems to be goodish
+
+#creating DTM 
+tokenizer <- function(x) NGramTokenizer(x, Weka_control(min= 1, max=2)) #creating tokenizer like data campl to include unigrams and bigrams
+io_dtm <- DocumentTermMatrix(io_corpus, control= list(tokenize= tokenizer))
+
+#making dtm a matrix then a tibble so I can view it
+io_dtm_tbl <- io_dtm %>% as.matrix %>% as.tibble
+
+#Making slim dtm
+io_slim_dtm <- removeSparseTerms(io_dtm, 0.996) # used remove Sparse Terms, messed around with the percentage to get the correct ratio. .997 was 623:519 while .995 was 623:168
+
+io_slim_dtm_tbl <- io_slim_dtm %>% as.matrix %>% as.tibble #ratio is between 2:1 to 3:1 because it's 623 to 250
+
 ```
+
 
 
 Visualization
