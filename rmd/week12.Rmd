@@ -24,10 +24,14 @@ library(textstem)
 library(rJava)
 library(qdap)
 library(RWeka)
+library(caret)
+library(parallel)
+library(doParallel)
 ```
 
 
-Data Import and Cleaning
+#Data Import and Cleaning
+
 ```{r}
 #getting urls
 #reddit_thread_urls <- find_thread_urls(
@@ -55,7 +59,9 @@ Data Import and Cleaning
 
 week12_tbl <- read_csv("../data/week12_tbl.csv")
 n <- nrow(week12_tbl)
+```
 
+```{r}
 ##creating corpus
 
 io_corpus_original <- VCorpus(VectorSource(week12_tbl$title)) #using data camp procedures
@@ -77,18 +83,20 @@ compare_them <- function(x,y){ #used x,y so can be used for other corpuses if ne
 }
 
 compare_them(io_corpus_original, io_corpus) #running the compare function to see differences between the original corpus and the preprocessed corpus. seems to be goodish
+```
 
+```{r}
 #creating DTM 
 tokenizer <- function(x) NGramTokenizer(x, Weka_control(min= 1, max=2)) #creating tokenizer like data campl to include unigrams and bigrams
 io_dtm <- DocumentTermMatrix(io_corpus, control= list(tokenize= tokenizer))
 
 #making dtm a matrix then a tibble so I can view it
-io_dtm_tbl <- io_dtm %>% as.matrix %>% as.tibble
+io_dtm_tbl <- io_dtm %>% as.matrix %>% as_tibble
 
 #Making slim dtm
 io_slim_dtm <- removeSparseTerms(io_dtm, 0.996) # used remove Sparse Terms, messed around with the percentage to get the correct ratio. .997 was 623:519 while .995 was 623:168
 
-io_slim_dtm_tbl <- io_slim_dtm %>% as.matrix %>% as.tibble #ratio is between 2:1 to 3:1 because it's 623 to 250
+io_slim_dtm_tbl <- io_slim_dtm %>% as.matrix %>% as_tibble #ratio is between 2:1 to 3:1 because it's 623 to 250
 
 tokenCounts <- apply(io_slim_dtm, 1, sum) #removing empty rows per lecture slides
 
@@ -99,19 +107,29 @@ removed_rows <- setdiff(original_rows, rownames(io_clean_dtm)) #code from chatgp
 
 print(removed_rows) #viewing which rows were removed
 
-io_clean_dtm_tbl <- io_clean_dtm %>% as.matrix %>% as.tibble #making io_clean_dtm a matrix and a tibble so I can examine. Cleaning removed 54 observations. 
+io_clean_dtm_tbl <- io_clean_dtm %>% as.matrix %>% as_tibble #making io_clean_dtm a matrix and a tibble so I can examine. Cleaning removed 54 observations. 
+```
 
+```{r}
 #using lda to categorize topics from io_slim_dtm
-
-io_dtm_tune <- FindTopicsNumber(
+cluster <- makeCluster(4) #doing 4 because I had fatal errors at 5. 
+registerDoParallel(cluster)
+tuning <- FindTopicsNumber(
   io_clean_dtm,
-  topics = seq(2,15,1),
+  topics = seq(2,10,1), #changed from 15 to 10 from slides because it was causing fatal errors
   metrics= c("Griffiths2004",
-             "CaoJaun2009",
+             "CaoJuan2009",
              "Arun2010",
              "Deveaud2014"),
   verbose=T
-)
+) #copied this text from lecture slides to begin topic extraction
+
+FindTopicsNumber_plot(tuning) #copied text from slides
+
+stopCluster(cluster) #stopping parallelization
+registerDoSEQ()
+
+
 ```
 
 
