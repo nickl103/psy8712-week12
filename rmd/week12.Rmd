@@ -128,10 +128,45 @@ FindTopicsNumber_plot(tuning) #copied text from slides
 
 stopCluster(cluster) #stopping parallelization
 registerDoSEQ()
-
-
 ```
 
+```{r}
+##examining lda results with all code taken from lecture slides. the only edit was switching from 10 factors to 5 which I made because ten seemed like too many. 
+lda_results <- LDA(io_clean_dtm, 5) 
+
+lda_betas <- tidy(lda_results, matrix="beta")
+lda_gammas <- tidy(lda_results, matrix= "gamma")
+
+lda_betas %>% 
+  group_by(topic) %>%
+  top_n(5, beta) %>%
+  arrange(topic, -beta) %>%
+  View
+
+lda_gammas %>% 
+  group_by(document) %>%
+  top_n(1, gamma) %>%
+  slice(1) %>%
+  ungroup %>%
+  mutate(document= as.numeric(document)) %>%
+  arrange(document) %>%
+  View
+```
+
+```{r}
+#topics_tbl with doc_id (document number identifier which should match the one contained in io_corpus), original (original post title), topic( the topic number assigned by the LDA), probability (the probability that document belongs to that topic)
+topics_tbl <- week12_tbl %>%
+  mutate(doc_id = 1:623) %>% #creating doc_id from original data
+  filter(!doc_id %in% removed_rows) %>% #removing rows that were removed when creating the topics
+  mutate(doc_id = as.character(doc_id)) %>% #making doc_id character so I can merge with gamma
+  full_join(lda_gammas, by= c("doc_id" = "document")) %>% #joining gamma results with original doc_ids
+  rename(original=title, #renaming titles to original per assignment instructions 
+         probability = gamma) %>% #renaming gamma to probability per assignment instructions
+  select(doc_id, original, topic, probability) #putting in order
+
+
+ 
+```
 
 
 Visualization
