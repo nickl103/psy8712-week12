@@ -2,15 +2,13 @@
 title: "PSY8712-Week12"
 author: "Mackenzie R Nickle"
 date: "2024-04-18"
-output: html_document
+output: 
+  html_document:
+    df_print: paged
 ---
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
-```
-
 Script Settings and Resources
-```{r}
+```{r echo=TRUE, results = 'hide', message= FALSE, warning =FALSE}
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 library(tidyverse)
 library(tidytext)
@@ -199,6 +197,15 @@ final_tbl <- topics_tbl <- week12_tbl %>%
   select(doc_id, original, upvotes, topic, probability) #putting in order
 ```
 
+
+anova analysis 
+```{r}
+final_aov <- aov(upvotes~topic, data= final_tbl)
+summary(final_aov)
+```
+
+Based on the anova, there is no significant difference of upvotes by topic. 
+
 machine learning analysis
 ```{r}
 #copied code from the machine learning project. used lm because the other ones were not working. 
@@ -233,3 +240,5 @@ holdout_m1 <- cor(
 
 cv_lm = .003
 holdout_m1 = .002
+
+Based on the cv and holdout_m1, there does not appear to be a significant difference of upvotes by topic. 
