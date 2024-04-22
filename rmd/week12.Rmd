@@ -30,7 +30,7 @@ library(doParallel)
 ```
 
 
-#Data Import and Cleaning
+# Data Import and Cleaning
 
 ```{r}
 #getting urls
@@ -154,7 +154,6 @@ lda_gammas %>%
 ```
 
 ```{r}
-#topics_tbl with doc_id (document number identifier which should match the one contained in io_corpus), original (original post title), topic( the topic number assigned by the LDA), probability (the probability that document belongs to that topic)
 topics_tbl <- week12_tbl %>%
   mutate(doc_id = 1:623) %>% #creating doc_id from original data
   filter(!doc_id %in% removed_rows) %>% #removing rows that were removed when creating the topics
@@ -163,12 +162,25 @@ topics_tbl <- week12_tbl %>%
   rename(original=title, #renaming titles to original per assignment instructions 
          probability = gamma) %>% #renaming gamma to probability per assignment instructions
   select(doc_id, original, topic, probability) #putting in order
-
-
- 
 ```
-
-
-Visualization
+Questions:
+1. Based on the beta matrix alone, the final topics the topic lists seem to map onto are:
+  Topic 1: is related to education and careers 
+  Topic 2: is positive descriptors like good and best 
+  Topic 3: is related to learning generally (readings and discussions were in this group)
+  They don't seem to map onto topics very well to be honest because jobs and careers were put into separate topics while research and graduate school were combined with careers. 
+  
+2. The lowest probability text was assigned to topic 5 and 3 and it seems to be that they were interested in studying at a graduate program which sort of matches topic 3 but should have been sorted into Topic 1 based on my interpretation. The highest probability was about a discussion of what literature people were reading which does seemsto fit onto my topic interpretation of learning generally. 
+# Visualization
+```{r}
+#created wordcloud using lecture slides. did 25 words because 50 seemed like a lot and was hard to interpret. 
+wordcloud(
+  words = names(io_dtm_tbl),
+  freq = colSums (io_dtm_tbl) ,
+  max.words= 25,
+  colors = brewer.pal(8, "Pastel2")
+)
+```
+Based on the wordcloud, it seems that most people are looking for advice related to jobs, careers or working, or graduate school. 
 
 Analysis
