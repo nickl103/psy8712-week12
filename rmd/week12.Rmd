@@ -170,7 +170,8 @@ Questions:
   Topic 3: is related to learning generally (readings and discussions were in this group)
   They don't seem to map onto topics very well to be honest because jobs and careers were put into separate topics while research and graduate school were combined with careers. 
   
-2. The lowest probability text was assigned to topic 5 and 3 and it seems to be that they were interested in studying at a graduate program which sort of matches topic 3 but should have been sorted into Topic 1 based on my interpretation. The highest probability was about a discussion of what literature people were reading which does seemsto fit onto my topic interpretation of learning generally. 
+2. The lowest probability text was assigned to topic 5 and 3 and it seems to be that they were interested in studying at a graduate program which sort of matches topic 3 but should have been sorted into Topic 1 based on my interpretation. The highest probability was about a discussion of what literature people were reading which does seems to fitish onto my topic interpretation of learning generally. Neither one of these is an exact fit however, and the topics don't seem to fit that well. 
+
 # Visualization
 ```{r}
 #created wordcloud using lecture slides. did 25 words because 50 seemed like a lot and was hard to interpret. 
@@ -183,4 +184,52 @@ wordcloud(
 ```
 Based on the wordcloud, it seems that most people are looking for advice related to jobs, careers or working, or graduate school. 
 
-Analysis
+# Analysis
+
+making final_tbl
+```{r}
+#same as topics_tbl code, just with upvotes kept. 
+final_tbl <- topics_tbl <- week12_tbl %>%
+  mutate(doc_id = 1:623) %>% #creating doc_id from original data
+  filter(!doc_id %in% removed_rows) %>% #removing rows that were removed when creating the topics
+  mutate(doc_id = as.character(doc_id)) %>% #making doc_id character so I can merge with gamma
+  full_join(lda_gammas, by= c("doc_id" = "document")) %>% #joining gamma results with original doc_ids
+  rename(original=title, #renaming titles to original per assignment instructions 
+         probability = gamma) %>% #renaming gamma to probability per assignment instructions
+  select(doc_id, original, upvotes, topic, probability) #putting in order
+```
+
+machine learning analysis
+```{r}
+#copied code from the machine learning project. used lm because the other ones were not working. 
+holdout_indices <- createDataPartition(final_tbl$upvotes,
+                                       p= .25,
+                                       list= T)$Resample1
+test_tbl <- final_tbl[holdout_indices,]
+training_tbl <- final_tbl[-holdout_indices, ]
+
+training_folds <- createFolds(training_tbl$upvotes)
+
+model_lm <- train(
+  upvotes ~ topic,
+  training_tbl,
+  method ="lm",
+  na.action = na.pass,
+  preProcess = "medianImpute",
+  trControl = trainControl (method= "cv",
+                            number = 10,
+                            verboseIter = T,
+                            indexOut = training_folds)
+)
+
+model_lm
+cv_lm <- max(model_lm$results$Rsquared)
+holdout_m1 <- cor(
+  predict(model_lm, test_tbl, na.action = na.pass),
+  test_tbl$upvotes
+)^2
+
+```
+
+cv_lm = .003
+holdout_m1 = .002
